@@ -5,4 +5,5 @@
 #pragma once
 
 int udp_connect();
-int udp_task();
+
+void udp_task();

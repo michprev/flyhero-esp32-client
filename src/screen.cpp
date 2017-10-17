@@ -4,6 +4,8 @@
 
 #include <ncurses.h>
 #include "screen.h"
+#include "shared_data.h"
+
 
 int init_screen() {
 
@@ -19,7 +21,8 @@ int init_screen() {
     if (keypad(stdscr, true) != OK)
         return -1;
 
-    //nodelay(stdscr, true);
+    // make getch non-blocking
+    nodelay(stdscr, true);
 
     // make cursor invisible
     if (curs_set(0) == ERR)
@@ -30,18 +33,22 @@ int init_screen() {
     mvprintw(1, 22, "Pitch: ");
     mvprintw(1, 42, "Yaw: ");
 
-    print_throttle(0);
-    print_euler(0, 0, 0);
+    print_throttle();
+    print_euler();
 
     return 0;
 }
 
-void print_euler(float roll, float pitch, float yaw) {
-    mvprintw(1, 12, "%8.3f", roll);
-    mvprintw(1, 32, "%8.3f", pitch);
-    mvprintw(1, 52, "%8.3f", yaw);
+void print_euler() {
+    Euler_Data euler = Get_Euler();
+
+    mvprintw(1, 12, "%8.3f", euler.roll);
+    mvprintw(1, 32, "%8.3f", euler.pitch);
+    mvprintw(1, 52, "%8.3f", euler.yaw);
 }
 
-void print_throttle(uint16_t throttle) {
+void print_throttle() {
+    uint16_t throttle = Get_Throttle();
+
     mvprintw(0, 16, "%4d", throttle);
 }

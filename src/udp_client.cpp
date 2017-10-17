@@ -12,9 +12,12 @@
 #include "crc.h"
 #include "shared_data.h"
 #include "screen.h"
+#include "logger.h"
 
 int udp_socket = -1;
 sockaddr_in server_address;
+
+void parse_message(uint8_t *data, int length);
 
 int udp_connect() {
     using namespace std;
@@ -38,7 +41,7 @@ int udp_connect() {
     return 0;
 }
 
-int udp_task() {
+void udp_task() {
     using namespace std;
 
     uint8_t data[6];
@@ -46,54 +49,84 @@ int udp_task() {
     const uint8_t READ_BUFFER_LENGTH = 20;
     uint8_t read_buffer[READ_BUFFER_LENGTH];
     int received_count;
-
+    chrono::system_clock::time_point time;
 
     while (Get_Run()) {
-        chrono::system_clock::time_point time = chrono::system_clock::now();
+        time = chrono::system_clock::now();
         time += chrono::milliseconds(80);
 
-        uint16_t tmp_throttle = Get_Throttle();
+        uint16_t throttle = Get_Throttle();
 
         data[0] = 6;
         data[1] = 0x00;
-
-        memcpy(data + 2, &tmp_throttle, sizeof(tmp_throttle));
+        data[2] = throttle & 0xFF;
+        data[3] = throttle >> 8;
 
         uint16_t crc = crc16(data, 4);
 
-        memcpy(data + 4, &crc, sizeof(crc));
+        data[4] = crc & 0xFF;
+        data[5] = crc >> 8;
 
         if (sendto(udp_socket, data, 6, 0, (sockaddr *)&server_address, sizeof(server_address)) == -1)
             cerr << "Could not send message" << endl;
 
-        uint32_t tmp;
-        if ( (received_count = recvfrom(udp_socket, read_buffer, READ_BUFFER_LENGTH, MSG_DONTWAIT, (sockaddr *)&server_address, &tmp)) > 0) {
-
-            if (read_buffer[0] != received_count)
-                continue;
-
-            uint16_t crc = read_buffer[received_count - 2] << 8;
-            crc |= read_buffer[received_count - 1];
-
-            if (crc != crc16(read_buffer, received_count - 2))
-                continue;
-
-
-            switch (read_buffer[1]) {
-                case 0x00:
-
-                    float roll, pitch, yaw;
-
-                    memcpy(&roll, read_buffer + 2, sizeof(roll));
-                    memcpy(&pitch, read_buffer + 6, sizeof(pitch));
-                    memcpy(&yaw, read_buffer + 10, sizeof(yaw));
-
-                    print_euler(roll, pitch, yaw);
-
-                    break;
-            }
-        }
+        socklen_t address_length;
+        if ( (received_count = recvfrom(udp_socket, read_buffer, READ_BUFFER_LENGTH,
+                                        MSG_DONTWAIT, (sockaddr *)&server_address, &address_length)) > 0)
+            parse_message(read_buffer, received_count);
 
         this_thread::sleep_until(time);
+    }
+}
+
+void parse_message(uint8_t *data, int length) {
+
+    if (length < 4 || data[0] != length) {
+        std::cerr << "test" << std::endl;
+
+        return;
+    }
+
+    uint16_t crc;
+    crc = data[length - 1] << 8;
+    crc |= data[length - 2];
+
+    if (crc != crc16(data, length - 2)) {
+        std::cerr << "crc error should be " <<  crc16(data, length - 2) << ", is " << crc << std::endl;
+
+        return;
+    }
+
+
+    switch (data[1]) {
+        case 0x00:
+            Euler_Data euler;
+
+            uint8_t *roll, *pitch, *yaw;
+            roll = (uint8_t*)&euler.roll;
+            pitch = (uint8_t*)&euler.pitch;
+            yaw = (uint8_t*)&euler.yaw;
+
+            roll[0] = data[5];
+            roll[1] = data[4];
+            roll[2] = data[3];
+            roll[3] = data[2];
+
+            pitch[0] = data[9];
+            pitch[1] = data[8];
+            pitch[2] = data[7];
+            pitch[3] = data[6];
+
+            yaw[0] = data[13];
+            yaw[1] = data[12];
+            yaw[2] = data[11];
+            yaw[3] = data[10];
+
+
+            log_euler(euler.roll, euler.pitch, euler.yaw);
+
+            Set_Euler(euler);
+
+            break;
     }
 }

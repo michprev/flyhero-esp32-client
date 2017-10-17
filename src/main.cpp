@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "shared_data.h"
+#include "logger.h"
 #include "screen.h"
 #include "udp_client.h"
 
@@ -19,12 +20,18 @@ int main(int argc, char **argv) {
     if (udp_connect() != 0)
         return 1;
 
+    if (open_log() != 0)
+        cerr << "Unable to open log file" << endl;
+
     thread udp_thread(udp_task);
 
     int key;
     uint16_t throttle;
 
     while (Get_Run()) {
+        print_throttle();
+        print_euler();
+
         switch (key = wgetch(stdscr)) {
             case -1:
 
@@ -48,12 +55,14 @@ int main(int argc, char **argv) {
 
                 break;
             default:
-                cout << "default key: " << key << endl;
+                mvprintw(20, 2, "unrecognized key %d", key);
                 break;
         }
     }
 
     udp_thread.join();
+
+    close_log();
 
     endwin();
 

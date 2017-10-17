@@ -7,5 +7,5 @@
 
 int init_screen();
 
-void print_euler(float roll, float pitch, float yaw);
-void print_throttle(uint16_t throttle);
+void print_euler();
+void print_throttle();
