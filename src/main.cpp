@@ -23,10 +23,15 @@ int main(int argc, char **argv) {
 
     int key;
     uint16_t throttle;
+    bool run = true;
 
-    while (true) {
+    while (run) {
         switch (key = wgetch(stdscr)) {
             case -1:
+
+                break;
+            case 5:
+                run = false;
 
                 break;
             case KEY_UP:
