@@ -4,7 +4,7 @@ project(flyhero_client)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
-        main.cpp)
+        main.cpp screen.h screen.cpp udp_client.cpp udp_client.h crc.cpp crc.h shared_data.cpp shared_data.h)
 
 add_executable(flyhero_client ${SOURCE_FILES})
 
