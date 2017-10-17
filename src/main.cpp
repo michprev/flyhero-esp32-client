@@ -23,15 +23,14 @@ int main(int argc, char **argv) {
 
     int key;
     uint16_t throttle;
-    bool run = true;
 
-    while (run) {
+    while (Get_Run()) {
         switch (key = wgetch(stdscr)) {
             case -1:
 
                 break;
             case 5:
-                run = false;
+                Set_Run(false);
 
                 break;
             case KEY_UP:
@@ -53,6 +52,10 @@ int main(int argc, char **argv) {
                 break;
         }
     }
+
+    udp_thread.join();
+
+    endwin();
 
     return 0;
 }

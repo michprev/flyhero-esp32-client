@@ -48,7 +48,7 @@ int udp_task() {
     int received_count;
 
 
-    while (true) {
+    while (Get_Run()) {
         chrono::system_clock::time_point time = chrono::system_clock::now();
         time += chrono::milliseconds(80);
 

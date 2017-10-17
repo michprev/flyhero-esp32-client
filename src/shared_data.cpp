@@ -8,8 +8,10 @@
 
 using namespace std;
 
-uint16_t Throttle;
+uint16_t Throttle = 0;
 timed_mutex Throttle_Mutex;
+
+bool Run = true;
 
 uint16_t Get_Throttle() {
     unique_lock<timed_mutex> throttle_lock(Throttle_Mutex, defer_lock);
@@ -35,4 +37,12 @@ void Set_Throttle(uint16_t throttle) {
     print_throttle(Throttle);
 
     throttle_lock.unlock();
+}
+
+bool Get_Run() {
+    return Run;
+}
+
+void Set_Run(bool run) {
+    Run = run;
 }
