@@ -5,6 +5,7 @@
 #include <fstream>
 #include <ctime>
 #include "logger.h"
+#include "shared_data.h"
 
 using namespace std;
 
@@ -26,13 +27,16 @@ int open_log() {
     return (log_file.is_open() ? 0 : -1);
 }
 
-void log_euler(float roll, float pitch, float yaw) {
+void log_data() {
     if (!header_written) {
-        log_file << "Roll;Pitch;Yaw" << endl;
+        log_file << "Roll;Pitch;Yaw;Throttle" << endl;
         header_written = true;
     }
 
-    log_file << roll << ";" << pitch << ";" << yaw << endl;
+    Euler_Data euler = Get_Euler();
+    uint16_t throttle = Get_Throttle();
+
+    log_file << euler.roll << ";" << euler.pitch << ";" << euler.yaw << ";" << throttle << endl;
 }
 
 void close_log() {

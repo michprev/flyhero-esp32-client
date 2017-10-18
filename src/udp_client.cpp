@@ -122,10 +122,9 @@ void parse_message(uint8_t *data, int length) {
             yaw[2] = data[11];
             yaw[3] = data[10];
 
-
-            log_euler(euler.roll, euler.pitch, euler.yaw);
-
             Set_Euler(euler);
+
+            log_data();
 
             break;
     }

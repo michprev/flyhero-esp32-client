@@ -8,4 +8,4 @@ int open_log();
 
 void close_log();
 
-void log_euler(float roll, float pitch, float yaw);
+void log_data();
