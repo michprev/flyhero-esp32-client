@@ -12,6 +12,7 @@ using namespace std;
 ofstream log_file;
 char file_name[50];
 bool header_written = false;
+clock_t start_time;
 
 int open_log() {
     time_t now;
@@ -28,15 +29,20 @@ int open_log() {
 }
 
 void log_data() {
-    if (!header_written) {
-        log_file << "Roll;Pitch;Yaw;Throttle" << endl;
-        header_written = true;
-    }
-
     Euler_Data euler = Get_Euler();
     uint16_t throttle = Get_Throttle();
 
-    log_file << euler.roll << ";" << euler.pitch << ";" << euler.yaw << ";" << throttle << endl;
+    if (!header_written) {
+        header_written = true;
+        start_time = clock();
+
+        log_file << "Roll;Pitch;Yaw;Throttle;Time" << endl;
+        log_file << euler.roll << ";" << euler.pitch << ";" << euler.yaw << ";"
+                 << throttle << ";" << 0 << endl;
+    }
+    else
+        log_file << euler.roll << ";" << euler.pitch << ";" << euler.yaw << ";"
+                 << throttle << ";" << 1000.0 * (clock() - start_time) / CLOCKS_PER_SEC << endl;
 }
 
 void close_log() {
