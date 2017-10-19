@@ -28,21 +28,35 @@ int open_log() {
     return (log_file.is_open() ? 0 : -1);
 }
 
-void log_data() {
-    Euler_Data euler = Get_Euler();
+void log_data(Euler_Data *euler, int euler_count) {
     uint16_t throttle = Get_Throttle();
 
     if (!header_written) {
         header_written = true;
         start_time = clock();
 
-        log_file << "Roll;Pitch;Yaw;Throttle;Time" << endl;
-        log_file << euler.roll << ";" << euler.pitch << ";" << euler.yaw << ";"
-                 << throttle << ";" << 0 << endl;
+        log_file << "Time;Throttle";
+
+        for (int i = 0; i < euler_count; i++)
+            log_file << ";Roll" << i << ";Pitch" << i << ";Yaw" << i;
+        log_file << endl;
+
+
+        log_file << 0 << ';' << throttle;
+
+        for (int i = 0; i < euler_count; i++)
+            log_file << ';' << euler[i].roll << ';' << euler[i].pitch << ';' << euler[i].yaw;
+
+        log_file << endl;
     }
-    else
-        log_file << euler.roll << ";" << euler.pitch << ";" << euler.yaw << ";"
-                 << throttle << ";" << 1000.0 * (clock() - start_time) / CLOCKS_PER_SEC << endl;
+    else {
+        log_file << 1000.0 * (clock() - start_time) / CLOCKS_PER_SEC << ';' << throttle;
+
+        for (int i = 0; i < euler_count; i++)
+            log_file << ';' << euler[i].roll << ';' << euler[i].pitch << ';' << euler[i].yaw;
+
+        log_file << endl;
+    }
 }
 
 void close_log() {

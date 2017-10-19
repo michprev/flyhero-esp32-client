@@ -46,7 +46,7 @@ void udp_task() {
 
     uint8_t data[6];
 
-    const uint8_t READ_BUFFER_LENGTH = 20;
+    const uint8_t READ_BUFFER_LENGTH = 40;
     uint8_t read_buffer[READ_BUFFER_LENGTH];
     int received_count;
     chrono::system_clock::time_point time;
@@ -100,31 +100,39 @@ void parse_message(uint8_t *data, int length) {
 
     switch (data[1]) {
         case 0x00:
-            Euler_Data euler;
+            if ((length - 4) % 12 != 0)
+                return;
+
+            const int EULER_DATA_COUNT = (length - 4) / 12;
 
             uint8_t *roll, *pitch, *yaw;
-            roll = (uint8_t*)&euler.roll;
-            pitch = (uint8_t*)&euler.pitch;
-            yaw = (uint8_t*)&euler.yaw;
 
-            roll[0] = data[5];
-            roll[1] = data[4];
-            roll[2] = data[3];
-            roll[3] = data[2];
+            Euler_Data *euler = new Euler_Data[EULER_DATA_COUNT];
 
-            pitch[0] = data[9];
-            pitch[1] = data[8];
-            pitch[2] = data[7];
-            pitch[3] = data[6];
+            for (int i = 0; i < EULER_DATA_COUNT; i++) {
+                roll = (uint8_t*)&(euler[i].roll);
+                pitch = (uint8_t*)&(euler[i].pitch);
+                yaw = (uint8_t*)&(euler[i].yaw);
 
-            yaw[0] = data[13];
-            yaw[1] = data[12];
-            yaw[2] = data[11];
-            yaw[3] = data[10];
+                roll[3] = data[2 + i * 12];
+                roll[2] = data[3 + i * 12];
+                roll[1] = data[4 + i * 12];
+                roll[0] = data[5 + i * 12];
 
-            Set_Euler(euler);
+                pitch[3] = data[6 + i * 12];
+                pitch[2] = data[7 + i * 12];
+                pitch[1] = data[8 + i * 12];
+                pitch[0] = data[9 + i * 12];
 
-            log_data();
+                yaw[3] = data[10 + i * 12];
+                yaw[2] = data[11 + i * 12];
+                yaw[1] = data[12 + i * 12];
+                yaw[0] = data[13 + i * 12];
+            }
+
+            Set_Euler(euler[0]);
+
+            log_data(euler, EULER_DATA_COUNT);
 
             break;
     }
