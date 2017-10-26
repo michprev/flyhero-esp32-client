@@ -9,3 +9,4 @@ int init_screen();
 
 void print_euler();
 void print_throttle();
+void print_cpu_load();

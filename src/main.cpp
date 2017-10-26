@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
     while (Get_Run()) {
         print_throttle();
         print_euler();
+        print_cpu_load();
 
         switch (key = wgetch(stdscr)) {
             case -1:

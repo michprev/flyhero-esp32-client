@@ -20,6 +20,9 @@ struct Euler_Data {
     }
 };
 
+double Get_CPU_Load();
+void Set_CPU_Load(double load);
+
 uint16_t Get_Throttle();
 void Set_Throttle(uint16_t throttle);
 

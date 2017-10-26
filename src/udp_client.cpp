@@ -81,7 +81,7 @@ void udp_task() {
 
 void parse_message(uint8_t *data, int length) {
 
-    if (length < 4 || data[0] != length) {
+    if (length < 6 || data[0] != length) {
         std::cerr << "test" << std::endl;
 
         return;
@@ -100,34 +100,40 @@ void parse_message(uint8_t *data, int length) {
 
     switch (data[1]) {
         case 0x00:
-            if ((length - 4) % 12 != 0)
+            if ((length - 6) % 12 != 0)
                 return;
 
-            const int EULER_DATA_COUNT = (length - 4) / 12;
+            const int EULER_DATA_COUNT = (length - 6) / 12;
 
+            uint16_t free_time;
             uint8_t *roll, *pitch, *yaw;
 
             Euler_Data *euler = new Euler_Data[EULER_DATA_COUNT];
 
+            free_time = data[2];
+            free_time |= data[3] << 8;
+
+            Set_CPU_Load((1000 - free_time) / 10.0);
+
             for (int i = 0; i < EULER_DATA_COUNT; i++) {
-                roll = (uint8_t*)&(euler[i].roll);
-                pitch = (uint8_t*)&(euler[i].pitch);
-                yaw = (uint8_t*)&(euler[i].yaw);
+                roll = (uint8_t *) &(euler[i].roll);
+                pitch = (uint8_t *) &(euler[i].pitch);
+                yaw = (uint8_t *) &(euler[i].yaw);
 
-                roll[3] = data[2 + i * 12];
-                roll[2] = data[3 + i * 12];
-                roll[1] = data[4 + i * 12];
-                roll[0] = data[5 + i * 12];
+                roll[3] = data[4 + i * 12];
+                roll[2] = data[5 + i * 12];
+                roll[1] = data[6 + i * 12];
+                roll[0] = data[7 + i * 12];
 
-                pitch[3] = data[6 + i * 12];
-                pitch[2] = data[7 + i * 12];
-                pitch[1] = data[8 + i * 12];
-                pitch[0] = data[9 + i * 12];
+                pitch[3] = data[8 + i * 12];
+                pitch[2] = data[9 + i * 12];
+                pitch[1] = data[10 + i * 12];
+                pitch[0] = data[11 + i * 12];
 
-                yaw[3] = data[10 + i * 12];
-                yaw[2] = data[11 + i * 12];
-                yaw[1] = data[12 + i * 12];
-                yaw[0] = data[13 + i * 12];
+                yaw[3] = data[12 + i * 12];
+                yaw[2] = data[13 + i * 12];
+                yaw[1] = data[14 + i * 12];
+                yaw[0] = data[15 + i * 12];
             }
 
             Set_Euler(euler[0]);

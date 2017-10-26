@@ -29,12 +29,14 @@ int init_screen() {
         return -1;
 
     mvprintw(0, 2, "Throttle: ");
+    mvprintw(0, 65, "CPU: ");
     mvprintw(1, 2, "Roll: ");
     mvprintw(1, 22, "Pitch: ");
     mvprintw(1, 42, "Yaw: ");
 
     print_throttle();
     print_euler();
+    print_cpu_load();
 
     return 0;
 }
@@ -51,4 +53,10 @@ void print_throttle() {
     uint16_t throttle = Get_Throttle();
 
     mvprintw(0, 16, "%4d", throttle);
+}
+
+void print_cpu_load() {
+    double load = Get_CPU_Load();
+
+    mvprintw(0, 70, "%4.1f", load);
 }
