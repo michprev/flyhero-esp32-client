@@ -44,7 +44,7 @@ int udp_connect() {
 void udp_task() {
     using namespace std;
 
-    uint8_t data[6];
+    uint8_t data[5];
 
     const uint8_t READ_BUFFER_LENGTH = 40;
     uint8_t read_buffer[READ_BUFFER_LENGTH];
@@ -57,17 +57,16 @@ void udp_task() {
 
         uint16_t throttle = Get_Throttle();
 
-        data[0] = 6;
-        data[1] = 0x00;
-        data[2] = throttle & 0xFF;
-        data[3] = throttle >> 8;
+        data[0] = 5;
+        data[1] = throttle & 0xFF;
+        data[2] = throttle >> 8;
 
-        uint16_t crc = crc16(data, 4);
+        uint16_t crc = crc16(data, 3);
 
-        data[4] = crc & 0xFF;
-        data[5] = crc >> 8;
+        data[3] = crc & 0xFF;
+        data[4] = crc >> 8;
 
-        if (sendto(udp_socket, data, 6, 0, (sockaddr *)&server_address, sizeof(server_address)) == -1)
+        if (sendto(udp_socket, data, 5, 0, (sockaddr *)&server_address, sizeof(server_address)) == -1)
             cerr << "Could not send message" << endl;
 
         socklen_t address_length;
@@ -81,7 +80,7 @@ void udp_task() {
 
 void parse_message(uint8_t *data, int length) {
 
-    if (length < 6 || data[0] != length) {
+    if ((length - 5) % 12 != 0 || data[0] != length) {
         std::cerr << "test" << std::endl;
 
         return;
@@ -98,48 +97,40 @@ void parse_message(uint8_t *data, int length) {
     }
 
 
-    switch (data[1]) {
-        case 0x00:
-            if ((length - 6) % 12 != 0)
-                return;
+    const int EULER_DATA_COUNT = (length - 5) / 12;
 
-            const int EULER_DATA_COUNT = (length - 6) / 12;
+    uint16_t free_time;
+    uint8_t *roll, *pitch, *yaw;
 
-            uint16_t free_time;
-            uint8_t *roll, *pitch, *yaw;
+    Euler_Data *euler = new Euler_Data[EULER_DATA_COUNT];
 
-            Euler_Data *euler = new Euler_Data[EULER_DATA_COUNT];
+    free_time = data[1];
+    free_time |= data[2] << 8;
 
-            free_time = data[2];
-            free_time |= data[3] << 8;
+    Set_CPU_Load((1000 - free_time) / 10.0);
 
-            Set_CPU_Load((1000 - free_time) / 10.0);
+    for (int i = 0; i < EULER_DATA_COUNT; i++) {
+        roll = (uint8_t *) &(euler[i].roll);
+        pitch = (uint8_t *) &(euler[i].pitch);
+        yaw = (uint8_t *) &(euler[i].yaw);
 
-            for (int i = 0; i < EULER_DATA_COUNT; i++) {
-                roll = (uint8_t *) &(euler[i].roll);
-                pitch = (uint8_t *) &(euler[i].pitch);
-                yaw = (uint8_t *) &(euler[i].yaw);
+        roll[3] = data[3 + i * 12];
+        roll[2] = data[4 + i * 12];
+        roll[1] = data[5 + i * 12];
+        roll[0] = data[6 + i * 12];
 
-                roll[3] = data[4 + i * 12];
-                roll[2] = data[5 + i * 12];
-                roll[1] = data[6 + i * 12];
-                roll[0] = data[7 + i * 12];
+        pitch[3] = data[7 + i * 12];
+        pitch[2] = data[8 + i * 12];
+        pitch[1] = data[9 + i * 12];
+        pitch[0] = data[10 + i * 12];
 
-                pitch[3] = data[8 + i * 12];
-                pitch[2] = data[9 + i * 12];
-                pitch[1] = data[10 + i * 12];
-                pitch[0] = data[11 + i * 12];
-
-                yaw[3] = data[12 + i * 12];
-                yaw[2] = data[13 + i * 12];
-                yaw[1] = data[14 + i * 12];
-                yaw[0] = data[15 + i * 12];
-            }
-
-            Set_Euler(euler[0]);
-
-            log_data(euler, EULER_DATA_COUNT);
-
-            break;
+        yaw[3] = data[11 + i * 12];
+        yaw[2] = data[12 + i * 12];
+        yaw[1] = data[13 + i * 12];
+        yaw[0] = data[14 + i * 12];
     }
+
+    Set_Euler(euler[0]);
+
+    log_data(euler, EULER_DATA_COUNT);
 }
