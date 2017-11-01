@@ -114,20 +114,20 @@ void parse_message(uint8_t *data, int length) {
         pitch = (uint8_t *) &(euler[i].pitch);
         yaw = (uint8_t *) &(euler[i].yaw);
 
-        roll[3] = data[3 + i * 12];
-        roll[2] = data[4 + i * 12];
-        roll[1] = data[5 + i * 12];
-        roll[0] = data[6 + i * 12];
+        roll[0] = data[3 + i * 12];
+        roll[1] = data[4 + i * 12];
+        roll[2] = data[5 + i * 12];
+        roll[3] = data[6 + i * 12];
 
-        pitch[3] = data[7 + i * 12];
-        pitch[2] = data[8 + i * 12];
-        pitch[1] = data[9 + i * 12];
-        pitch[0] = data[10 + i * 12];
+        pitch[0] = data[7 + i * 12];
+        pitch[1] = data[8 + i * 12];
+        pitch[2] = data[9 + i * 12];
+        pitch[3] = data[10 + i * 12];
 
-        yaw[3] = data[11 + i * 12];
-        yaw[2] = data[12 + i * 12];
-        yaw[1] = data[13 + i * 12];
-        yaw[0] = data[14 + i * 12];
+        yaw[0] = data[11 + i * 12];
+        yaw[1] = data[12 + i * 12];
+        yaw[2] = data[13 + i * 12];
+        yaw[3] = data[14 + i * 12];
     }
 
     Set_Euler(euler[0]);
