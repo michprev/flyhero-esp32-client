@@ -107,7 +107,7 @@ void parse_message(uint8_t *data, int length) {
     free_time = data[1];
     free_time |= data[2] << 8;
 
-    Set_CPU_Load((1000 - free_time) / 10.0);
+    Set_CPU_Load(100 - free_time / 100.0);
 
     for (int i = 0; i < EULER_DATA_COUNT; i++) {
         roll = (uint8_t *) &(euler[i].roll);
