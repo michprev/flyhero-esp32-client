@@ -44,7 +44,7 @@ int udp_connect() {
 void udp_task() {
     using namespace std;
 
-    uint8_t data[5];
+    uint8_t data[11];
 
     const uint8_t READ_BUFFER_LENGTH = 40;
     uint8_t read_buffer[READ_BUFFER_LENGTH];
@@ -57,16 +57,22 @@ void udp_task() {
 
         uint16_t throttle = Get_Throttle();
 
-        data[0] = 5;
+        data[0] = 11;
         data[1] = throttle & 0xFF;
         data[2] = throttle >> 8;
+        data[3] = 0;
+        data[4] = 0;
+        data[5] = 0;
+        data[6] = 0;
+        data[7] = 0;
+        data[8] = 0;
 
-        uint16_t crc = crc16(data, 3);
+        uint16_t crc = crc16(data, 9);
 
-        data[3] = crc & 0xFF;
-        data[4] = crc >> 8;
+        data[9] = crc & 0xFF;
+        data[10] = crc >> 8;
 
-        if (sendto(udp_socket, data, 5, 0, (sockaddr *)&server_address, sizeof(server_address)) == -1)
+        if (sendto(udp_socket, data, 11, 0, (sockaddr *)&server_address, sizeof(server_address)) == -1)
             cerr << "Could not send message" << endl;
 
         socklen_t address_length;
