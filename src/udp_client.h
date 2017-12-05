@@ -4,6 +4,6 @@
 
 #pragma once
 
-int udp_connect();
+bool udp_connect();
 
 void udp_task();

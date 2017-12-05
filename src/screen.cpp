@@ -3,12 +3,13 @@
 //
 
 #include <ncurses.h>
+#include <cstdlib>
 #include "screen.h"
 #include "shared_data.h"
 
 
-int init_screen() {
-
+int init_screen()
+{
     // initialize ncurses
     initscr();
     // disable console buffering
@@ -28,20 +29,42 @@ int init_screen() {
     if (curs_set(0) == ERR)
         return -1;
 
-    mvprintw(0, 2, "Throttle: ");
-    mvprintw(0, 65, "CPU: ");
-    mvprintw(1, 2, "Roll: ");
-    mvprintw(1, 22, "Pitch: ");
-    mvprintw(1, 42, "Yaw: ");
-
-    print_throttle();
-    print_euler();
-    print_cpu_load();
-
     return 0;
 }
 
-void print_euler() {
+MENU *print_tcp_menu()
+{
+    ITEM **my_menu_items = (ITEM **)calloc(4, sizeof(ITEM *));
+
+    my_menu_items[0] = new_item("Calibrate", "");
+    set_item_userptr(my_menu_items[0], (void *) "Calibrate");
+    my_menu_items[1] = new_item("Start", "");
+    set_item_userptr(my_menu_items[1], (void *) "Start");
+    my_menu_items[2] = new_item("Exit", "");
+    set_item_userptr(my_menu_items[2], (void *) "Exit");
+    my_menu_items[3] = NULL;
+
+    MENU *commands_menu = new_menu(my_menu_items);
+    set_menu_mark(commands_menu, "* ");
+
+    post_menu(commands_menu);
+    refresh();
+
+    return commands_menu;
+}
+
+void free_tcp_menu(MENU *menu)
+{
+    int i = 0;
+
+    while(menu->items[i] != NULL)
+        free_item(menu->items[i++]);
+
+    free_menu(menu);
+}
+
+void print_euler()
+{
     Euler_Data euler = Get_Euler();
 
     mvprintw(1, 12, "%8.3f", euler.roll);
@@ -49,13 +72,15 @@ void print_euler() {
     mvprintw(1, 52, "%8.3f", euler.yaw);
 }
 
-void print_throttle() {
+void print_throttle()
+{
     uint16_t throttle = Get_Throttle();
 
     mvprintw(0, 16, "%4d", throttle);
 }
 
-void print_cpu_load() {
+void print_cpu_load()
+{
     double load = Get_CPU_Load();
 
     mvprintw(0, 70, "%4.1f", load);

@@ -6,6 +6,7 @@
 #include "screen.h"
 #include "shared_data.h"
 
+
 using namespace std;
 
 Euler_Data Euler(0, 0, 0);
@@ -20,7 +21,8 @@ double CPU_Load;
 timed_mutex CPU_Load_Mutex;
 
 
-double Get_CPU_Load() {
+double Get_CPU_Load()
+{
     unique_lock<timed_mutex> cpu_load_lock(CPU_Load_Mutex, defer_lock);
 
     if (!cpu_load_lock.try_lock_for(chrono::milliseconds(5)))
@@ -33,7 +35,8 @@ double Get_CPU_Load() {
     return ret;
 }
 
-void Set_CPU_Load(double load) {
+void Set_CPU_Load(double load)
+{
     unique_lock<timed_mutex> cpu_load_lock(CPU_Load_Mutex, defer_lock);
 
     if (!cpu_load_lock.try_lock_for(chrono::milliseconds(5)))
@@ -44,7 +47,8 @@ void Set_CPU_Load(double load) {
     cpu_load_lock.unlock();
 }
 
-uint16_t Get_Throttle() {
+uint16_t Get_Throttle()
+{
     unique_lock<timed_mutex> throttle_lock(Throttle_Mutex, defer_lock);
 
     if (!throttle_lock.try_lock_for(chrono::milliseconds(5)))
@@ -57,7 +61,8 @@ uint16_t Get_Throttle() {
     return ret;
 }
 
-void Set_Throttle(uint16_t throttle) {
+void Set_Throttle(uint16_t throttle)
+{
     unique_lock<timed_mutex> throttle_lock(Throttle_Mutex, defer_lock);
 
     if (!throttle_lock.try_lock_for(chrono::milliseconds(5)))
@@ -68,15 +73,18 @@ void Set_Throttle(uint16_t throttle) {
     throttle_lock.unlock();
 }
 
-bool Get_Run() {
+bool Get_Run()
+{
     return Run;
 }
 
-void Set_Run(bool run) {
+void Set_Run(bool run)
+{
     Run = run;
 }
 
-Euler_Data Get_Euler() {
+Euler_Data Get_Euler()
+{
     unique_lock<timed_mutex> euler_lock(Euler_Mutex, defer_lock);
 
     if (!euler_lock.try_lock_for(chrono::milliseconds(5)))
@@ -89,7 +97,8 @@ Euler_Data Get_Euler() {
     return ret;
 }
 
-void Set_Euler(Euler_Data euler) {
+void Set_Euler(Euler_Data euler)
+{
     unique_lock<timed_mutex> euler_lock(Euler_Mutex, defer_lock);
 
     if (!euler_lock.try_lock_for(chrono::milliseconds(5)))

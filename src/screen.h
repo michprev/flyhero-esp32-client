@@ -5,7 +5,13 @@
 #pragma once
 
 
+#include <menu.h>
+
+
 int init_screen();
+
+MENU* print_tcp_menu();
+void free_tcp_menu(MENU *menu);
 
 void print_euler();
 void print_throttle();

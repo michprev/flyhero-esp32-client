@@ -1,10 +1,22 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.5)
 project(flyhero_client)
 
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
-        src/main.cpp src/screen.h src/screen.cpp src/udp_client.cpp src/udp_client.h src/crc.cpp src/crc.h src/shared_data.cpp src/shared_data.h src/logger.cpp src/logger.h)
+        src/main.cpp
+        src/screen.h
+        src/screen.cpp
+        src/tcp_client.h
+        src/tcp_client.cpp
+        src/udp_client.h
+        src/udp_client.cpp
+        src/crc.h
+        src/crc.cpp
+        src/shared_data.h
+        src/shared_data.cpp
+        src/logger.h
+        src/logger.cpp)
 
 add_executable(flyhero_esp32_client ${SOURCE_FILES})
 
@@ -19,6 +31,7 @@ if(CMAKE_THREAD_LIBS_INIT)
 endif()
 
 target_link_libraries(flyhero_esp32_client "${CURSES_LIBRARIES}")
+target_link_libraries(flyhero_esp32_client menu)
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")

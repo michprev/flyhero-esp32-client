@@ -4,16 +4,19 @@
 
 #pragma once
 
-struct Euler_Data {
-    float roll, pitch, yaw;
+struct Euler_Data
+{
+    double roll, pitch, yaw;
 
-    Euler_Data() {
+    Euler_Data()
+    {
         this->roll = 0;
         this->pitch = 0;
         this->yaw = 0;
     }
 
-    Euler_Data(float roll, float pitch, float yaw) {
+    Euler_Data(double roll, double pitch, double yaw)
+    {
         this->roll = roll;
         this->pitch = pitch;
         this->yaw = yaw;
